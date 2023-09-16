@@ -23,17 +23,17 @@ pub struct DbClassLinkMultiple {
 }
 
 impl DbClassLinkMultiple {
-    pub fn new(name: &str, ident: &DbClassIdentifier) -> DbClassField {
+    pub fn new(name: impl Into<String>, ident: &DbClassIdentifier) -> DbClassField {
         DbClassLinkMultiple {
-            name: name.to_string(),
+            name: name.into(),
             ident: ident.clone(),
             prefetch: false,
         }
         .into()
     }
-    pub fn new_prefetch(name: &str, ident: &DbClassIdentifier) -> DbClassField {
+    pub fn new_prefetch(name: impl Into<String>, ident: &DbClassIdentifier) -> DbClassField {
         DbClassLinkMultiple {
-            name: name.to_string(),
+            name: name.into(),
             ident: ident.clone(),
             prefetch: true,
         }
@@ -48,17 +48,17 @@ pub struct DbClassLinkSingle {
 }
 
 impl DbClassLinkSingle {
-    pub fn new(name: &str, ident: &DbClassIdentifier) -> DbClassField {
+    pub fn new(name: impl Into<String>, ident: &DbClassIdentifier) -> DbClassField {
         DbClassLinkSingle {
-            name: name.to_string(),
+            name: name.into(),
             ident: ident.clone(),
             prefetch: false,
         }
         .into()
     }
-    pub fn new_prefetch(name: &str, ident: &DbClassIdentifier) -> DbClassField {
+    pub fn new_prefetch(name: impl Into<String>, ident: &DbClassIdentifier) -> DbClassField {
         DbClassLinkSingle {
-            name: name.to_string(),
+            name: name.into(),
             ident: ident.clone(),
             prefetch: true,
         }

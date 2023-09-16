@@ -1,24 +1,66 @@
 use proc_macro2::TokenStream;
 use quote::quote;
-use std::collections::HashSet;
+use std::collections::HashMap;
 
-use crate::db_class::{DbClass, DbClassIdentifier};
+use crate::{
+    db_class::{DbClass, DbClassIdentifier},
+    db_field::{DbClassLinkMultiple, DbClassLinkSingle},
+    db_relation::{DbRelation, DbRelationType},
+};
 
 pub struct DbManager {
-    classes: HashSet<DbClass>,
+    classes: HashMap<DbClassIdentifier, DbClass>,
 }
 
 impl DbManager {
     pub fn new() -> Self {
         DbManager {
-            classes: HashSet::new(),
+            classes: HashMap::new(),
         }
     }
 
     pub fn add_class(&mut self, class: DbClass) -> DbClassIdentifier {
         let ident = class.ident.clone();
-        self.classes.insert(class);
+        self.classes.insert(ident.clone(), class);
         ident
+    }
+
+    pub fn add_relation(&mut self, relation: DbRelation) {
+        self.add_one_side_of_relation(
+            relation.left.clone(),
+            relation.right.clone(),
+            relation.prefetch,
+        );
+        self.add_one_side_of_relation(relation.right, relation.left, false);
+    }
+    fn add_one_side_of_relation(
+        &mut self,
+        left: DbRelationType,
+        right: DbRelationType,
+        prefetch: bool,
+    ) {
+        let left_iden = left.clone().to_relation_end().ident;
+        let right_iden = right.to_relation_end().ident;
+        let field = match &left {
+            DbRelationType::Single(l) => {
+                if prefetch {
+                    DbClassLinkSingle::new_prefetch(&l.name, &right_iden)
+                } else {
+                    DbClassLinkSingle::new(&l.name, &right_iden)
+                }
+            }
+            DbRelationType::Many(l) => {
+                if prefetch {
+                    DbClassLinkMultiple::new_prefetch(&l.name, &right_iden)
+                } else {
+                    DbClassLinkMultiple::new(&l.name, &right_iden)
+                }
+            }
+        };
+        self.classes
+            .get_mut(&left_iden)
+            .unwrap()
+            .ref_add_field(field);
     }
 }
 
@@ -26,7 +68,7 @@ impl DbManager {
     pub fn to_tokens(self) -> TokenStream {
         let struct_tokens = self
             .classes
-            .into_iter()
+            .into_values()
             .map(|c| {
                 let struct_ = c.to_main_builder().to_tokens();
                 let id_struct = c.to_id_builder().to_tokens();

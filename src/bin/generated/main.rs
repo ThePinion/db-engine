@@ -59,7 +59,7 @@ async fn main() -> surrealdb::Result<()> {
                 age: 20,
                 email: "test@test.gmail".to_string(),
                 name: "Konstantyn".to_string(),
-            },
+            }
         ]),
     }
     .db_create_get(&db)

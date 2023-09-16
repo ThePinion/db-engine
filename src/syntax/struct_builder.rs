@@ -139,11 +139,14 @@ impl DbClass {
         for f in self.link_single_fields() {
             builder.add_field(Field::with_decorators(
                 &f.name,
-                format!(
-                    "DbLink<{}, {}>",
-                    f.ident.id_struct_name(),
-                    f.ident.value_struct_name()
-                ),
+                if f.prefetch {
+                    format!(
+                        "DbLink<{}, {}>",
+                        f.ident.id_struct_name(),
+                        f.ident.value_struct_name()
+                    )
+                } else {f.ident.id_struct_name()}
+                ,
                 vec!["#[serde(serialize_with = \"db_link_to_thing\")]"],
             ));
         }
@@ -181,11 +184,13 @@ impl DbClass {
         for f in self.link_multiple_fields() {
             builder.add_field(Field::with_decorators(
                 &f.name,
-                format!(
-                    "DbLink<Vec<{}>, Vec<{}>>",
-                    f.ident.id_struct_name(),
-                    f.ident.value_struct_name()
-                ),
+                if f.prefetch {
+                    format!(
+                        "DbLink<Vec<{}>, Vec<{}>>",
+                        f.ident.id_struct_name(),
+                        f.ident.value_struct_name()
+                    )
+                } else {format!("Vec<{}>", f.ident.id_struct_name())},
                 vec!["#[serde(serialize_with = \"db_link_to_vec_thing\")]"],
             ));
         }

@@ -32,6 +32,9 @@ impl DbClass {
         self.fields.push(field);
         self
     }
+    pub fn ref_add_field(&mut self, field: DbClassField) {
+        self.fields.push(field);
+    }
     pub fn simple_fields(&self) -> Vec<DbClassSimpleField> {
         self.fields
             .iter()
